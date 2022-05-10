@@ -1,9 +1,7 @@
 import pymongo, os
-
 myclient = pymongo.MongoClient(os.getenv('MONGODB_CONNSTRING'))
 
 mydb = myclient["mydatabase"]
-
 mycolEmployee = mydb["employee"]
 
 def count(result):
@@ -26,4 +24,3 @@ def addEmployee(firstName, lastName):
   username = generateUsername()
   mydict = { "firstName": firstName, "lastName": lastName, "username": username, "password": username }
   mycolEmployee.insert_one(mydict)
-

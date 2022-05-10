@@ -2,7 +2,7 @@ version: '3.3'
 services:
   db:
     build: mongodb
-  
+
   api:
     build: backend
     volumes: 
@@ -14,4 +14,4 @@ services:
     depends_on:
       - db
     environment:
-      - ENV MONGODB_CONNSTRING="mongodb://root:root@db"
+      - MONGODB_CONNSTRING=mongodb://root:root@db
