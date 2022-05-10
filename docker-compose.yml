@@ -1,7 +1,7 @@
 version: '3.3'
 services:
   db:
-    build: database
+    build: mongodb
   
   api:
     build: backend
@@ -13,3 +13,5 @@ services:
     - db
     depends_on:
       - db
+    environment:
+      - ENV MONGODB_CONNSTRING="mongodb://root:root@db"
