@@ -2,13 +2,10 @@ create database TimeKeeping;
 
 use TimeKeeping;
 
-create table Factory(id int PRIMARY KEY AUTO_INCREMENT, 
-name text);
 
 Create table Employee(id int PRIMARY KEY AUTO_INCREMENT, 
                         firstName text NOT NULL, 
                         lastName text NOT NULL, 
-                        idFactory int NOT NULL, 
                         img LONGBLOB, 
                         username text NOT NULL, 
                         password text NOT NULL,
