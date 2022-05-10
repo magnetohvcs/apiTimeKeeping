@@ -1,7 +1,6 @@
-MONGODB_CONNSTRING="mongodb://root:root@localhost"
-import pymongo
+import pymongo, os
 
-myclient = pymongo.MongoClient(MONGODB_CONNSTRING)
+myclient = pymongo.MongoClient(os.getenv('MONGODB_CONNSTRING'))
 
 mydb = myclient["mydatabase"]
 
