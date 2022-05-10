@@ -1,8 +1,7 @@
 from flask import Flask, request, jsonify
-from db import database
+import db
 
 app = Flask(__name__)
-db = database()
 
 
 @app.route('/')
@@ -11,7 +10,7 @@ def index():
 
 @app.route('/employee/getEmployee')
 def getEmployee():
-    data = db.getEmployees()
+    data = db.getEmployee()
     return data
 
 if __name__=="__main__":
