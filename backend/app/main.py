@@ -12,7 +12,6 @@ def index():
 @app.route('/employee/getEmployee')
 def getEmployee():
     data = db.getEmployees()
-    print(data)
     return data
 
 if __name__=="__main__":
