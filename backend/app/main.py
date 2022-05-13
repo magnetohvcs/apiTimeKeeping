@@ -1,4 +1,3 @@
-from crypt import methods
 from flask import Flask, request, jsonify
 import db
 
@@ -22,8 +21,15 @@ def delEmployee():
 def addEmployee():
     try:
         return jsonify({"message" : db.addEmployee(request.json['firstName'], request.json['lastName'])})
-    except:
-        return jsonify({"message" : False})
+    except Exception as e:
+        return jsonify({"message" : e})
+
+@app.route('/employee/editEmployee', methods=['POST'])
+def editEmployee():
+    try:
+        return jsonify({"message" : db.editEmployee(request.json['firstName'], request.json['lastName'])})
+    except Exception as e:
+        return jsonify({"message" : e})
 
 
 @app.route('/product/getProduct')

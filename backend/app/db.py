@@ -35,6 +35,10 @@ def delEmployee(query : dict):
   mycolEmployee.delete_one({"username" : query['id']})
   return True
 
+def editEmployee(value):
+  myquery = { "username": value["username"] }
+  newvalues = { "$set": { "firstName": value["firstName"], "lastName" : value["lastName"] } }
+  mycolEmployee.update_one(myquery, newvalues)
 
 def addProduct( name, price=0):
   mydict = { "id": Id4Product(), "name": name, "price": price}
@@ -53,4 +57,5 @@ def getProduct():
 def editProduct(value):
   myquery = { "id": value["id"] }
   newvalues = { "$set": { "name": value["name"], "price" : value["price"] } }
-  mycolProduct.update_many(myquery, newvalues)
+  mycolProduct.update_one(myquery, newvalues)
+
