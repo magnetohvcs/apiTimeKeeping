@@ -1,4 +1,7 @@
 import pymongo, os
+import pandas as pd
+from datetime import date
+
 myclient = pymongo.MongoClient(os.getenv('MONGODB_CONNSTRING'))
 
 mydb = myclient["mydatabase"]
@@ -28,10 +31,10 @@ def generateUsername():
   return "NV{0:04d}".format(count(mycolEmployee.find()))  
   
 def Id4Product():
-  return "SP{0:09d}".format(count(mycolProduct.find()))  
+  return "SP{0:04d}".format(count(mycolProduct.find()))  
 
 def Id4TimeKeeping():
-    return "TP{0:10d}".format(count(mycolTimeKeeping.find()))
+    return "TP{0:4d}".format(count(mycolTimeKeeping.find()))
 
 def getEmployee():
   list = [element for element in mycolEmployee.find({},{"_id":0})]
@@ -80,23 +83,6 @@ def editProduct(value):
   mycolProduct.update_one(myquery, newvalues)
 
 
-def addTimekeeping(idEmployee, dateTimeKeeping):
-  try:
-    x = mycolTimeKeeping.find_one({"idEmployee": idEmployee, "dateTimeKeeping": dateTimeKeeping})
-  except:
-    mydict = {"id": Id4TimeKeeping(), "idEmployee": idEmployee, "dateTimeKeeping": dateTimeKeeping, "checkIn": True}
-    mycolTimeKeeping.insert_one(mydict)
-
-  try:
-    if x['checkIn']:
-      newvalues = { "$set": {  "checkOut" : True } }
-      mycolTimeKeeping.update_one({"idEmployee": idEmployee, "dateTimeKeeping": dateTimeKeeping}, newvalues)
-      return "Ban da check out thanh cong"
-  except:
-    return "Ban da check in thanh cong" 
-
-
-
 def delTimeKeeping(query: dict):
     mycolTimeKeeping.delete_one(query)
 
@@ -127,9 +113,9 @@ def login(query ):
     return True
   return False
 
-def updatePassword(query):
-  newvalues = { "$set": {  "password" : query['password'] } }
-  mycolEmployee.update_one({"username": query['username']}, newvalues)
+def updatePassword(username, password):
+  newvalues = { "$set": {  "password" : password} }
+  mycolEmployee.update_one({"username": username}, newvalues)
 
 def getProfile(query):
   x = mycolEmployee.find_one(query, {"_id":0 , "password":0})
@@ -147,10 +133,53 @@ def getFile(username):
     return None
 
 def update_profile(query):
-  newvalues = { "$set": {  "firstName" : query['firstName'], 'lastName':query['lastName'] } }
+  newvalues = { "$set": {  "firstName" : query['firstName'], 'lastName':query['lastName'], 'email': query['email'], 'sdt':query['sdt'] } }
   mycolEmployee.update_one({"username": query['username']}, newvalues)
 
 def update_password(query):
   newvalues = { "$set": {  "password" : query['password'] } }
   mycolEmployee.update_one({"username": query['username']}, newvalues)
 
+def exportEmployee():
+  id, first, last = [],[],[]
+  
+  for element in mycolEmployee.find({},{"_id":0, "password":0}):
+    id.append(element['username'])
+    first.append(element['firstName'])
+    last.append(element['lastName'])
+
+  data = {'Ma Cong Nhan': id,
+        'Ho': first,
+        'Ten': last
+        }
+
+  df = pd.DataFrame(data, columns = ['Ma Cong Nhan', 'Ho', 'Ten'])
+  dir_file = f'/app/static/employee{os.urandom(10).hex()}.xlsx'
+  df.to_excel(dir_file, index = False, header=True)
+  return dir_file
+
+def findTimeKeeping(query):
+  x = mycolTimeKeeping.find_one(query)
+  return x
+
+def checkIn(id):
+  current_date = date.today()
+  try:
+    x = mycolTimeKeeping.find_one({"idEmployee": id, "dateTimeKeeping": current_date})
+    if x['checkIN']:
+      return "Hom nay ban da check in"
+  except:
+    mydict = {"id": Id4TimeKeeping(), "idEmployee": id, "dateTimeKeeping": current_date, "checkIn": True}
+    mycolTimeKeeping.insert_one(mydict)
+    return "Ban da check in thanh cong"
+
+def checkOut(id):
+  current_date = date.today()
+  try:
+    x = mycolTimeKeeping.find_one({"idEmployee": id, "dateTimeKeeping": current_date})
+    if x['checkIn']:
+      newvalues = { "$set": {  "checkOut" : True } }
+      mycolTimeKeeping.update_one({"idEmployee": id, "dateTimeKeeping": current_date}, newvalues)
+      return "Ban da check out thanh cong"
+  except:
+    return "Ban da check out thanh cong"

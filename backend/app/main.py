@@ -1,8 +1,25 @@
 from flask import Flask, request, jsonify, send_from_directory
 import db, os
+from flask_mail import Mail, Message
 
 app = Flask(__name__)
+app.config.from_object('config.Mail')
 
+mail= Mail(app)
+
+@app.route('/forgetPassword', methods=['POST'])
+def forget():
+    password = os.urandom(10).hex()
+
+    db.updatePassword(request.json['username'], password)
+    query = db.getProfile(request.json)
+
+    msg = Message('Forget password', sender = 'managatoonltw@gmail.com', recipients = [query['email']])
+    msg.html = """<h3>Xin chao %s %s<h3>
+        <p>Mat khau cua ban la <b>%s</b> </p>"""%(query['firstName'], query['lastName'], password)
+    mail.send(msg)
+
+    return jsonify({'message': True})
 
 @app.route('/')
 def index():
@@ -113,7 +130,6 @@ def upload():
 def getFile():
     return jsonify({'message': f"/{db.getFile(request.json['username'])}"})
 
-
 @app.route('/static/<path:path>')
 def send_report(path):
     return send_from_directory('static', path)
@@ -133,6 +149,31 @@ def updatePassword():
         return jsonify({"message" : True})
     except:
         return jsonify({"message" : False})     
+
+@app.route('/export/excel/employee', methods=['GET'])
+def export_excel():
+    return jsonify({'message':db.exportEmployee()})
+
+@app.route('/timekeeping/findTimekeeping', methods=['POST'])
+def findTimeKeeping():
+    return db.findTimeKeeping(request.json)
+
+@app.route('/timekeeping/checkIn', methods=['POST'])
+def checkIn():
+    try:
+        db.checkIn(request.json['id'])
+        return jsonify({"message" : True})
+    except:
+        return jsonify({"message" : False})
+
+@app.route('/timekeeping/checkOut', methods=['POST'])
+def checkOut():
+    try:
+        db.checkOut(request.json)
+        return jsonify({"message" : True})
+    except:
+        return jsonify({"message" : False})
+
 
 if __name__=="__main__":
     db.init()
