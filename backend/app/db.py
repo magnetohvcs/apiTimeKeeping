@@ -2,6 +2,8 @@ import pymongo, os
 myclient = pymongo.MongoClient(os.getenv('MONGODB_CONNSTRING'))
 
 mydb = myclient["mydatabase"]
+
+
 mycolEmployee = mydb["employee"]
 mycolProduct = mydb["product"]
 mycolTimeKeeping = mydb["timekeeping"]
@@ -12,6 +14,15 @@ def count(result):
   for _ in result:
     count += 1
   return count
+
+def init():
+  try:
+    x = mycolEmployee.find_one()
+    if x == None:
+      mydict = { "firstName": 'admin', "lastName": 'admin', "username": 'admin', "password": 'admin' }
+      x = mycolEmployee.insert_one(mydict)
+  except:
+    pass
 
 def generateUsername():
   return "NV{0:04d}".format(count(mycolEmployee.find()))  
@@ -29,11 +40,14 @@ def getEmployee():
     dict[index] = element
   return dict
   
+
 def addEmployee(firstName, lastName):
   username = generateUsername()
   mydict = { "firstName": firstName, "lastName": lastName, "username": username, "password": username }
   x = mycolEmployee.insert_one(mydict)
   return x.inserted_id
+
+
 
 def delEmployee(query : dict):
   if query['id'] == 'admin':
@@ -67,8 +81,21 @@ def editProduct(value):
 
 
 def addTimekeeping(idEmployee, dateTimeKeeping):
-    mydict = {"id": Id4TimeKeeping(), "idEmployee": idEmployee, "dateTimeKeeping": dateTimeKeeping}
+  try:
+    x = mycolTimeKeeping.find_one({"idEmployee": idEmployee, "dateTimeKeeping": dateTimeKeeping})
+  except:
+    mydict = {"id": Id4TimeKeeping(), "idEmployee": idEmployee, "dateTimeKeeping": dateTimeKeeping, "checkIn": True}
     mycolTimeKeeping.insert_one(mydict)
+
+  try:
+    if x['checkIn']:
+      newvalues = { "$set": {  "checkOut" : True } }
+      mycolTimeKeeping.update_one({"idEmployee": idEmployee, "dateTimeKeeping": dateTimeKeeping}, newvalues)
+      return "Ban da check out thanh cong"
+  except:
+    return "Ban da check in thanh cong" 
+
+
 
 def delTimeKeeping(query: dict):
     mycolTimeKeeping.delete_one(query)
@@ -126,3 +153,4 @@ def update_profile(query):
 def update_password(query):
   newvalues = { "$set": {  "password" : query['password'] } }
   mycolEmployee.update_one({"username": query['username']}, newvalues)
+
