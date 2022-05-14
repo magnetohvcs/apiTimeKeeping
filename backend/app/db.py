@@ -173,13 +173,18 @@ def checkIn(id):
     mycolTimeKeeping.insert_one(mydict)
     return "Ban da check in thanh cong"
 
-def checkOut(id):
+def checkOut(query):
   current_date = date.today()
   try:
-    x = mycolTimeKeeping.find_one({"idEmployee": id, "dateTimeKeeping": current_date})
+    x = mycolTimeKeeping.find_one({"idEmployee": query['id'], "dateTimeKeeping": current_date})
     if x['checkIn']:
       newvalues = { "$set": {  "checkOut" : True } }
       mycolTimeKeeping.update_one({"idEmployee": id, "dateTimeKeeping": current_date}, newvalues)
-      return "Ban da check out thanh cong"
+      
+    x = mycolTimeKeeping.find_one({"idEmployee": query['id'], "dateTimeKeeping": current_date})  
+    if x['checkOut']:
+      addInfoTimekeeping(x['id'],query['idProduct'], query['num1'], query['num0'] )
   except:
     return "Ban da check out thanh cong"
+  
+    
