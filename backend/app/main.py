@@ -132,8 +132,9 @@ def updatePassword():
         db.update_password(request.json)
         return jsonify({"message" : True})
     except:
-        return jsonify({"message" : False}) 
+        return jsonify({"message" : False})     
 
 if __name__=="__main__":
+    db.init()
     app.run("0.0.0.0",8080,True)
 
