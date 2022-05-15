@@ -43,14 +43,11 @@ def getEmployee():
     dict[index] = element
   return dict
   
-
 def addEmployee(firstName, lastName):
   username = generateUsername()
   mydict = { "firstName": firstName, "lastName": lastName, "username": username, "password": username }
   x = mycolEmployee.insert_one(mydict)
   return x.inserted_id
-
-
 
 def delEmployee(query : dict):
   if query['id'] == 'admin':
@@ -68,7 +65,7 @@ def addProduct( name, price=0):
   mycolProduct.insert_one(mydict)
 
 def delProduct(query : dict):
-  mycolProduct.delete_one(query)
+  mycolProduct.delete_one({'id':query['id']})
 
 def getProduct():
   list = [element for element in mycolProduct.find({},{"_id":0})]
@@ -107,8 +104,8 @@ def getInfoTimeKeeping():
         dict[index] = element
     return dict
 
-def login(query ):
-  x = mycolEmployee.find_one(query)
+def login(query):
+  x = mycolEmployee.find_one({'username': query['username'], 'password': query['password']})
   if x != None:
     return True
   return False
